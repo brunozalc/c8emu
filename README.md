@@ -1,2 +1,2 @@
-# gbemu
-A GameBoy emulator written in C++
+# c8emu
+A CHIP-8 emulator written in C++
