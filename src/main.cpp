@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "CPU.h"
 #include "memory.h"
 
 int main(int argc, char** argv) {
@@ -9,6 +10,7 @@ int main(int argc, char** argv) {
   }
 
   Memory memory;
+  CPU cpu(memory);
   memory.load_rom(argv[1]);
 
   // simple test to check if the ROM is loaded correctly
@@ -16,6 +18,11 @@ int main(int argc, char** argv) {
        ++i) {  // adjust range based on the size of your ROM
     std::cout << std::hex << "Memory at " << i << ": "
               << static_cast<int>(memory.read(i)) << std::endl;
+  }
+
+  // simple loop to emulate a few cycles
+  for (int i = 0; i < 10; ++i) {
+    cpu.emulate_cycle();
   }
 
   return 0;
