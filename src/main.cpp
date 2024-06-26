@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 
   // simple loop to emulate a few cycles
   for (int i = 0; i < 10; ++i) {
-    cpu.emulate_cycle();
+    cpu.cycle();
   }
 
   return 0;
