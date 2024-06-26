@@ -9,7 +9,7 @@ class CPU {
  public:
   CPU(Memory& memory);
   void initialize();
-  void emulate_cycle();
+  void cycle();
 
  private:
   // registers
@@ -28,4 +28,5 @@ class CPU {
 
   // fetch, decode and execute cycle
   void fetch_decode_execute();
+  void process_opcode(uint16_t opcode);
 };
