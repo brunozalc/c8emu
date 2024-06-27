@@ -61,3 +61,12 @@ void Input::handle_event(const SDL_Event& event) {
 }
 
 bool Input::is_key_down(uint8_t key) const { return key_state[key]; }
+
+bool Input::is_any_key_down() const {
+  for (bool key : key_state) {
+    if (key) {
+      return true;
+    }
+  }
+  return false;
+}
