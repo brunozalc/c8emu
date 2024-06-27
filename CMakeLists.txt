@@ -15,7 +15,6 @@ include_directories(${SDL_INCLUDE_DIRS})
 
 # add source files
 file(GLOB SOURCES "src/*.cpp")
-message(STATUS "SOURCES: ${SOURCES}")
 
 # add executable
 add_executable(chip8_emulator ${SOURCES})
