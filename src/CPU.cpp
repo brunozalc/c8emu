@@ -31,9 +31,8 @@ void CPU::cycle() {
   uint16_t opcode = memory.read(pc) << 8 | memory.read(pc + 1);
 
   // decode and execute
-  std::cout << "Executing opcode: " << std::hex << opcode << std::endl;
-  process_opcode(opcode);
   pc += 2;
+  process_opcode(opcode);
 }
 
 void CPU::process_opcode(uint16_t opcode) {

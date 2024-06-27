@@ -1,29 +1,39 @@
 #pragma once
 
-#include <iostream>
 #include <random>
 
 #include "CPU.h"
 
+// macros for easier access to CPU getters
+// this is just for convenience
+#define memory cpu.get_memory()
+#define display cpu.get_display()
+#define input cpu.get_input()
+#define V cpu.get_registers()
+#define I cpu.get_I()
+#define pc cpu.get_pc()
+#define sp cpu.get_sp()
+#define stack cpu.get_stack()
+#define delay_timer cpu.get_delay_timer()
+#define sound_timer cpu.get_sound_timer()
+
 // 00E0: clear the screen (CLS)
-inline void opcode_00E0(CPU& cpu) { cpu.get_display().clear(); }
+inline void opcode_00E0(CPU& cpu) { display.clear(); }
 
 // 00EE: return from a subroutine (RET)
 inline void opcode_00EE(CPU& cpu) {
-  cpu.get_pc() = cpu.get_stack()[cpu.get_sp()];
-  cpu.get_sp()--;
+  pc = stack[sp];
+  sp--;
 }
 
 // 1NNN: jump to address NNN (JP addr)
-inline void opcode_1NNN(CPU& cpu, uint16_t opcode) {
-  cpu.get_pc() = opcode & 0x0FFFu;
-}
+inline void opcode_1NNN(CPU& cpu, uint16_t opcode) { pc = opcode & 0x0FFFu; }
 
 // 2NNN: call subroutine at NNN (CALL addr)
 inline void opcode_2NNN(CPU& cpu, uint16_t opcode) {
-  cpu.get_sp()++;
-  cpu.get_stack()[cpu.get_sp()] = cpu.get_pc();
-  cpu.get_pc() = opcode & 0x0FFFu;
+  sp++;
+  stack[sp] = pc;
+  pc = opcode & 0x0FFFu;
 }
 
 // 3XNN: skip next instruction if VX equals NN (SE Vx, byte)
@@ -32,7 +42,7 @@ inline void opcode_3XNN(CPU& cpu, uint16_t opcode) {
   uint8_t byte = opcode & 0x00FFu;
 
   if (VX == byte) {
-    cpu.get_pc() += 2;
+    pc += 2;
   }
 }
 
@@ -42,7 +52,7 @@ inline void opcode_4XNN(CPU& cpu, uint16_t opcode) {
   uint8_t byte = opcode & 0x00FFu;
 
   if (VX != byte) {
-    cpu.get_pc() += 2;
+    pc += 2;
   }
 }
 
@@ -52,7 +62,7 @@ inline void opcode_5XY0(CPU& cpu, uint16_t opcode) {
   uint8_t& VY = cpu.get_vy(opcode);
 
   if (VX == VY) {
-    cpu.get_pc() += 2;
+    pc += 2;
   }
 }
 
@@ -109,8 +119,7 @@ inline void opcode_8XY4(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
   uint8_t& VY = cpu.get_vy(opcode);
 
-  (VY > (0xFF - VX)) ? cpu.get_registers()[0xF] = 1
-                     : cpu.get_registers()[0xF] = 0;
+  (VY > (0xFF - VX)) ? V[0xF] = 1 : V[0xF] = 0;
 
   VX += VY;
 }
@@ -121,7 +130,7 @@ inline void opcode_8XY5(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
   uint8_t& VY = cpu.get_vy(opcode);
 
-  (VX > VY) ? cpu.get_registers()[0xF] = 1 : cpu.get_registers()[0xF] = 0;
+  (VX > VY) ? V[0xF] = 1 : V[0xF] = 0;
 
   VX -= VY;
 }
@@ -131,7 +140,7 @@ inline void opcode_8XY5(CPU& cpu, uint16_t opcode) {
 inline void opcode_8XY6(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
 
-  cpu.get_registers()[0xF] = VX & 0x1;
+  V[0xF] = VX & 0x1;
   VX >>= 1;
 }
 
@@ -140,7 +149,7 @@ inline void opcode_8XY7(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
   uint8_t& VY = cpu.get_vy(opcode);
 
-  (VY > VX) ? cpu.get_registers()[0xF] = 1 : cpu.get_registers()[0xF] = 0;
+  (VY > VX) ? V[0xF] = 1 : V[0xF] = 0;
 
   VX = VY - VX;
 }
@@ -150,7 +159,7 @@ inline void opcode_8XY7(CPU& cpu, uint16_t opcode) {
 inline void opcode_8XYE(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
 
-  cpu.get_registers()[0xF] = VX >> 7;
+  V[0xF] = VX >> 7;
   VX <<= 1;
 }
 
@@ -160,18 +169,16 @@ inline void opcode_9XY0(CPU& cpu, uint16_t opcode) {
   uint8_t& VY = cpu.get_vy(opcode);
 
   if (VX != VY) {
-    cpu.get_pc() += 2;
+    pc += 2;
   }
 }
 
 // ANNN: set I to the address NNN (LD I, addr)
-inline void opcode_ANNN(CPU& cpu, uint16_t opcode) {
-  cpu.get_I() = opcode & 0x0FFFu;
-}
+inline void opcode_ANNN(CPU& cpu, uint16_t opcode) { I = opcode & 0x0FFFu; }
 
 // BNNN: jump to the address NNN plus V0 (JP V0, addr)
 inline void opcode_BNNN(CPU& cpu, uint16_t opcode) {
-  cpu.get_pc() = (opcode & 0x0FFFu) + cpu.get_registers()[0];
+  pc = (opcode & 0x0FFFu) + V[0];
 }
 
 // CXNN: set VX to the result of a random byte & NN (RND Vx, byte)
@@ -194,17 +201,17 @@ inline void opcode_DXYN(CPU& cpu, uint16_t opcode) {
   uint8_t x = VX;
   uint8_t y = VY;
   uint8_t height = opcode & 0x000Fu;
-  const uint8_t* sprite = cpu.get_memory().get_pointer(cpu.get_I());
+  const uint8_t* sprite = memory.get_pointer(I);
 
-  bool collision = cpu.get_display().draw_sprite(x, y, sprite, height);
-  cpu.get_registers()[0xF] = collision ? 1 : 0;
+  bool collision = display.draw_sprite(x, y, sprite, height);
+  V[0xF] = collision ? 1 : 0;
 }
 
 // EX9E: skip next instruction if key with the value of VX is pressed (SKP Vx)
 inline void opcode_EX9E(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  if (cpu.get_input().is_key_down(VX)) {
-    cpu.get_pc() += 2;
+  if (input.is_key_down(VX)) {
+    pc += 2;
   }
 }
 
@@ -212,56 +219,56 @@ inline void opcode_EX9E(CPU& cpu, uint16_t opcode) {
 // Vx)
 inline void opcode_EXA1(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  if (!cpu.get_input().is_key_down(VX)) {
-    cpu.get_pc() += 2;
+  if (!input.is_key_down(VX)) {
+    pc += 2;
   }
 }
 
 // FX07: set VX to the value of the delay timer (LD Vx, DT)
 inline void opcode_FX07(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  VX = cpu.get_delay_timer();
+  VX = delay_timer;
 }
 
 // FX0A: wait for a key press and store the result in VX (LD Vx, K)
 inline void opcode_FX0A(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
 
-  if (cpu.get_input().is_any_key_down()) {
+  if (input.is_any_key_down()) {
     for (int i = 0; i < 16; i++) {
-      if (cpu.get_input().is_key_down(i)) {
+      if (input.is_key_down(i)) {
         VX = i;
         return;
       }
     }
   } else {
-    cpu.get_pc() -= 2;
+    pc -= 2;
   }
 }
 
 // FX15: set the delay timer to the value of VX (LD DT, Vx)
 inline void opcode_FX15(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  cpu.get_delay_timer() = VX;
+  delay_timer = VX;
 }
 
 // FX18: set the sound timer to the value of VX (LD ST, Vx)
 inline void opcode_FX18(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  cpu.get_sound_timer() = VX;
+  sound_timer = VX;
 }
 
 // FX1E: add the value of VX to I (ADD I, Vx)
 inline void opcode_FX1E(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  cpu.get_I() += VX;
+  I += VX;
 }
 
 // FX29: set I to the memory address of the sprite data corresponding to the hex
 // digit stored in VX (LD F, Vx)
 inline void opcode_FX29(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  cpu.get_I() = VX * 0x5;  // 5 bytes per character
+  I = VX * 0x5;  // 5 bytes per character
 }
 
 // FX33: store the binary-coded decimal representation of VX at the addresses I,
@@ -269,9 +276,9 @@ inline void opcode_FX29(CPU& cpu, uint16_t opcode) {
 inline void opcode_FX33(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
 
-  cpu.get_memory().write(cpu.get_I(), VX / 100);
-  cpu.get_memory().write(cpu.get_I() + 1, (VX / 10) % 10);
-  cpu.get_memory().write(cpu.get_I() + 2, (VX % 100) % 10);
+  memory.write(I, VX / 100);
+  memory.write(I + 1, (VX / 10) % 10);
+  memory.write(I + 2, (VX % 100) % 10);
 }
 
 // FX55: store the values of V0 to VX in memory starting at address I (LD [I],
@@ -280,7 +287,7 @@ inline void opcode_FX55(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
 
   for (int i = 0; i <= VX; i++) {
-    cpu.get_memory().write(cpu.get_I() + i, cpu.get_registers()[i]);
+    memory.write(I + i, V[i]);
   }
 }
 
@@ -289,6 +296,18 @@ inline void opcode_FX55(CPU& cpu, uint16_t opcode) {
 inline void opcode_FX65(CPU& cpu, uint16_t opcode) {
   uint8_t VX = (opcode & 0x0F00u) >> 8u;
   for (int i = 0; i <= VX; ++i) {
-    cpu.get_registers()[i] = cpu.get_memory().read(cpu.get_I() + i);
+    V[i] = memory.read(I + i);
   }
 }
+
+// undefine macros to avoid conflicts
+#undef memory
+#undef display
+#undef input
+#undef V
+#undef I
+#undef pc
+#undef sp
+#undef stack
+#undef delay_timer
+#undef sound_timer
