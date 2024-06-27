@@ -3,11 +3,13 @@
 #include <array>
 #include <cstdint>
 
+#include "display.h"
+#include "input.h"
 #include "memory.h"
 
 class CPU {
  public:
-  CPU(Memory& memory);
+  CPU(Memory& memory, Display& display, Input& input);
   void initialize();
   void cycle();
 
@@ -21,6 +23,12 @@ class CPU {
 
   // memory reference for easier access
   Memory& memory;
+
+  // display reference for easier access
+  Display& display;
+
+  // input reference for easier access
+  Input& input;
 
   // timers
   uint8_t delay_timer;
