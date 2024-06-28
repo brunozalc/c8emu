@@ -33,6 +33,17 @@ void CPU::cycle() {
   // decode and execute
   pc += 2;
   process_opcode(opcode);
+
+  if (delay_timer > 0) {
+    --delay_timer;
+  }
+
+  if (sound_timer > 0) {
+    if (sound_timer == 1) {
+      // TODO: play sound
+    }
+    --sound_timer;
+  }
 }
 
 void CPU::process_opcode(uint16_t opcode) {
