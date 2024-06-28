@@ -234,16 +234,14 @@ inline void opcode_FX07(CPU& cpu, uint16_t opcode) {
 inline void opcode_FX0A(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
 
-  if (input.is_any_key_down()) {
-    for (int i = 0; i < 16; i++) {
-      if (input.is_key_down(i)) {
-        VX = i;
-        return;
-      }
+  for (int i = 0; i < 16; ++i) {
+    if (input.is_key_down(i)) {
+      VX = i;
+      return;
     }
-  } else {
-    pc -= 2;
   }
+  // if no key is pressed, do not proceed to the next instruction
+  pc -= 2;
 }
 
 // FX15: set the delay timer to the value of VX (LD DT, Vx)
