@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     display.render();
 
     // delay to match the CHIP-8 speed (16ms for approx. 60Hz)
-    SDL_Delay(3);
+    SDL_Delay(16);
   }
 
   SDL_Quit();
