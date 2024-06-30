@@ -26,10 +26,10 @@ void Memory::load_rom(const char* filename) {
   }
 }
 
-// method to load fontset into memory
+// method to load fontset into memory (starts at 0x50)
 void Memory::load_font() {
   for (size_t i = 0; i < fontset.size(); i++) {
-    memory[i] = fontset[i];
+    memory[0x50 + i] = fontset[i];
   }
 }
 
