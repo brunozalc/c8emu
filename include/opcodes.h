@@ -194,6 +194,7 @@ inline void opcode_CXNN(CPU& cpu, uint16_t opcode) {
 }
 
 // DXYN: draw a sprite at position VX, VY with N bytes of sprite data starting
+// TODO: review this opcode
 inline void opcode_DXYN(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
   uint8_t& VY = cpu.get_vy(opcode);
