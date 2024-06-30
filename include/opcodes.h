@@ -242,6 +242,7 @@ inline void opcode_FX0A(CPU& cpu, uint16_t opcode) {
   }
   // if no key is pressed, do not proceed to the next instruction
   pc -= 2;
+  return;
 }
 
 // FX15: set the delay timer to the value of VX (LD DT, Vx)
@@ -266,7 +267,7 @@ inline void opcode_FX1E(CPU& cpu, uint16_t opcode) {
 // digit stored in VX (LD F, Vx)
 inline void opcode_FX29(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
-  I = VX * 0x5;  // 5 bytes per character
+  I = 0x50 + VX * 0x5;  // 5 bytes per character
 }
 
 // FX33: store the binary-coded decimal representation of VX at the addresses I,
@@ -274,9 +275,16 @@ inline void opcode_FX29(CPU& cpu, uint16_t opcode) {
 inline void opcode_FX33(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
 
-  memory.write(I, VX / 100);
-  memory.write(I + 1, (VX / 10) % 10);
-  memory.write(I + 2, (VX % 100) % 10);
+  // ones place
+  memory.write(I + 2, VX % 10);
+  VX /= 10;
+
+  // tens place
+  memory.write(I + 1, VX % 10);
+  VX /= 10;
+
+  // hundreds place
+  memory.write(I, VX % 10);
 }
 
 // FX55: store the values of V0 to VX in memory starting at address I (LD [I],
