@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
             current_time - last_cycle_time)
             .count();
 
-    if (elapsed_time > 1.0f / 300.0f) {
+    if (elapsed_time > 3.0f) {
       // update the last cycle time
       last_cycle_time = current_time;
 
