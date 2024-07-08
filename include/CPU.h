@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstdint>
+#include <random>
 
 #include "display.h"
 #include "input.h"
@@ -12,6 +13,9 @@ class CPU {
   CPU(Memory& memory, Display& display, Input& input);
   void initialize();
   void cycle();
+
+  std::default_random_engine rand_gen;
+  std::uniform_int_distribution<uint8_t> rand_byte;
 
   // getters
   Memory& get_memory();

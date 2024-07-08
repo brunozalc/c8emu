@@ -2,13 +2,19 @@
 
 #include <stdint.h>
 
+#include <chrono>
 #include <iostream>
+#include <random>
 
 #include "display.h"
 #include "opcodes.h"
 
 CPU::CPU(Memory& memory, Display& display, Input& input)
-    : memory(memory), display(display), input(input) {
+    : memory(memory),
+      display(display),
+      input(input),
+      rand_gen(std::chrono::system_clock::now().time_since_epoch().count()) {
+  rand_byte = std::uniform_int_distribution<uint8_t>(0, 255);
   initialize();
 }
 

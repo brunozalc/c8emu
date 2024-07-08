@@ -1,7 +1,5 @@
 #pragma once
 
-#include <random>
-
 #include "CPU.h"
 
 // macros for easier access to CPU getters
@@ -183,18 +181,13 @@ inline void opcode_BNNN(CPU& cpu, uint16_t opcode) {
 
 // CXNN: set VX to the result of a random byte & NN (RND Vx, byte)
 inline void opcode_CXNN(CPU& cpu, uint16_t opcode) {
-  static std::random_device rd;
-  static std::mt19937 gen(rd());
-  static std::uniform_int_distribution<> dist(0, 255);
-
   uint8_t& VX = cpu.get_vx(opcode);
   uint8_t byte = opcode & 0x00FFu;
 
-  VX = dist(gen) & byte;
+  VX = cpu.rand_byte(cpu.rand_gen) & byte;
 }
 
 // DXYN: draw a sprite at position VX, VY with N bytes of sprite data starting
-// TODO: review this opcode
 inline void opcode_DXYN(CPU& cpu, uint16_t opcode) {
   uint8_t& VX = cpu.get_vx(opcode);
   uint8_t& VY = cpu.get_vy(opcode);
