@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstdint>
+#include <random>
 
 #include "display.h"
 #include "input.h"
@@ -12,6 +13,23 @@ class CPU {
   CPU(Memory& memory, Display& display, Input& input);
   void initialize();
   void cycle();
+
+  std::default_random_engine rand_gen;
+  std::uniform_int_distribution<uint8_t> rand_byte;
+
+  // getters
+  Memory& get_memory();
+  Display& get_display();
+  Input& get_input();
+  uint8_t* get_registers();
+  uint8_t& get_vx(uint16_t opcode);
+  uint8_t& get_vy(uint16_t opcode);
+  uint16_t& get_I();
+  uint16_t& get_pc();
+  uint8_t& get_sp();
+  uint16_t* get_stack();
+  uint8_t& get_delay_timer();
+  uint8_t& get_sound_timer();
 
  private:
   // registers
@@ -34,7 +52,24 @@ class CPU {
   uint8_t delay_timer;
   uint8_t sound_timer;
 
-  // fetch, decode and execute cycle
-  void fetch_decode_execute();
+  // opcode execution logic
   void process_opcode(uint16_t opcode);
 };
+
+// getters
+inline Memory& CPU::get_memory() { return memory; }
+inline Display& CPU::get_display() { return display; }
+inline Input& CPU::get_input() { return input; }
+inline uint8_t* CPU::get_registers() { return V.data(); }
+inline uint8_t& CPU::get_vx(uint16_t opcode) {
+  return V[(opcode & 0x0F00u) >> 8u];
+}
+inline uint8_t& CPU::get_vy(uint16_t opcode) {
+  return V[(opcode & 0x00F0u) >> 4u];
+}
+inline uint16_t& CPU::get_I() { return I; }
+inline uint16_t& CPU::get_pc() { return pc; }
+inline uint8_t& CPU::get_sp() { return sp; }
+inline uint16_t* CPU::get_stack() { return stack.data(); }
+inline uint8_t& CPU::get_delay_timer() { return delay_timer; }
+inline uint8_t& CPU::get_sound_timer() { return sound_timer; }

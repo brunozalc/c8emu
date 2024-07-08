@@ -1,5 +1,7 @@
 #include "input.h"
 
+#include <SDL2/SDL.h>
+
 #include "SDL_events.h"
 
 Input::Input() { key_state.fill(false); }

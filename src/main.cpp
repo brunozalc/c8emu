@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
 
   // main loop
   bool running = true;
+  auto last_cycle_time = std::chrono::high_resolution_clock::now();
   SDL_Event event;
 
   while (running) {
@@ -40,14 +41,23 @@ int main(int argc, char** argv) {
       }
     }
 
-    // execute one cycle of the CPU
-    cpu.cycle();
+    // get the current time
+    auto current_time = std::chrono::high_resolution_clock::now();
+    float elapsed_time =
+        std::chrono::duration<float, std::chrono::milliseconds::period>(
+            current_time - last_cycle_time)
+            .count();
 
-    // render the display
-    display.render();
+    if (elapsed_time > 3.0f) {
+      // update the last cycle time
+      last_cycle_time = current_time;
 
-    // delay to match the CHIP-8 speed (16ms for approx. 60Hz)
-    SDL_Delay(16);
+      // run the CPU
+      cpu.cycle();
+
+      // update the display
+      display.render();
+    }
   }
 
   SDL_Quit();
